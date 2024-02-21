@@ -2,10 +2,11 @@ import random
 import sys
 from Adafruit_IO import MQTTClient
 import time
+from ai_recognition import predictWearingMask
 
 AIO_FEED_IDs = ["nutnhan1","nutnhan2"]
 AIO_USERNAME = "namkhoapham"
-AIO_KEY = "aio_Igis53xxHX8MZ8vjLlnzwrn9Bt6P"
+AIO_KEY = "aio_OoOw32ZFLJ20ZsxAcgUYAFFubbwC"
 
 def connected(client):
     print("Ket noi thanh cong ...")
@@ -31,6 +32,7 @@ client.connect()
 client.loop_background()
 
 counter = 10
+counter_ai = 5
 while True:
     counter = counter -1
     if counter <= 0:
@@ -42,5 +44,16 @@ while True:
         client.publish("cambien2", humi)
         light = random.randint(100,500)
         client.publish("cambien3", light)
+
+    counter_ai = counter_ai -1
+    imageStatus = ""
+    imagePreviousStatus = ""
+    if counter_ai <= 0:
+        counter_ai = 5
+        ai_result = predictWearingMask()
+        print("ai detect: ", ai_result)
+        imagePreviousStatus = imageStatus
+        imageStatus = ai_result
+        if imageStatus != imagePreviousStatus:
+            client.publish("ai", imageStatus)
     time.sleep(1)
-    pass
